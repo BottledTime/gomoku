@@ -1,0 +1,353 @@
+This is the code submission for the Final Project from Derek Shultz and 
+Mingjun Zhao from Section EA1.
+
+This program is a game called Gomoku or 5Chess. It has a 19 by 19 board.
+Two players take turns putting a piece of their respective colour on 
+empty spots on the board. The first one that has his five adjacent pieces in
+any direction wins the game. Navigate the board with a cursor by moving the 
+joystick around. Place a piece on the board by depressing the joystick. 
+
+For best results in moving the piece with the joystick in the way that makes 
+the most sense, it is recommended to hook up the LCD screen and the joystick 
+on the same half of the breadboard with the side that the pins are on on each 
+pointing in the opposite direction of the other's. We put our LCD screen 
+below the Arduino board with the side with the pins pointing away from the 
+Arduino board and the joystick farther up the breadboard with the side with 
+the pins facing towards the Arduino board. This is not important to the 
+wiring of the project. It just makes the joystick's movement correspond to
+the cursor's movement. Do not worry about doing this at all, it's just how
+we liked wiring it up.
+
+The equipment needed includes an arduino, an LCD screen, a joystick and
+wires, all included in the class kit. The wiring is the same as shown on 
+http://ugweb.cs.ualberta.ca/~c274/web/ConcreteComputing/section/adafruit_lcd.htm
+with the exceptions of the joystick having VERT hooked up to analog pin 1 and 
+HORZ being hooked up to analog pin 0, as well as the SD card. No SD card is 
+needed. Here is a summary of the wiring:
+
+- the LCD screen was attached to the breadboard under the 
+  circuit board of the arduino
+
+- the joystick was hooked up to the breadboard so its pins face 
+  towards the pins of the LCD (basically, make it so the joystick
+  and the LCD are oriented so their pins are in between them) (this
+  is not to say they should be on the same rows of the bread board.
+  Don't do that!)
+
+- 5V hooked up to VCC pin of joystick
+
+- analog pin 0 hooked up to HORZ pin of joystick
+
+- analog pin 1 hooked up to VERT pin of joystick
+
+- digital pin 9 hooked up to SEL pin of joystick
+
+- ground hooked up to GND pin of joystick
+
+- 5V hooked up to top pin of LCD
+
+- digital pin 50 hooked up to the second pin of LCD
+
+- digital pin 52 hooked up to the third pin of LCD
+
+- digital pin 51 hooked up to the fourth pin of LCD
+
+- digital pin 6 hooked up to the fifth pin of LCD
+
+- digital pin 5 hooked up to the sixth pin of LCD
+
+- digital pin 7 hooked up to the seventh pin of LCD
+
+- digital pin 8 hooked up to the eighth pin of LCD
+
+- 5V hooked up to the ninth pin of LCD
+
+- ground hooked up to the tenth pin of LCD (says GND on bottom)
+
+(The order of the LCD screen wiring is arbitrary based on its orientation.
+Start at the pin labeled LITE on the bottom of the LCD and work your way
+towards Gnd following the instructions here to hook it up correctly. For 
+a picture and wiring diagram of the LCD screen, go to the link above. Note
+again that the wiring of the joystick at said link is slightly different
+from ours.)
+
+This project contains a main file called 5Chess.cpp and three .h files 
+as our customized library, and two extra .cpp files describing the 
+functions declared in the .h files. drawing.cpp describes functions
+involved in drawing various parts of the board on the screen and deciding
+what to draw based on user input. math.h describes functions that use math
+to enforce the rules of the game, namely, deciding which coordinates on the 
+board would win the game for each player. Both of these have corresponding .h
+files that declare the functions described in their .cpp counterparts. The other
+.h file, board_values.h defines states of the board and player to make the code
+more readable. All .h files have ifndef loops in place to make sure they are 
+not defined more than once.
+
+On our project proposal, we mentioned having more than one game and having
+instruction screens. We did not have time to do this as we implemented the 
+hints that our feedback said would be preferable. We believe it would 
+not be too difficult to adapt our code to a new game or add an instruction
+screen, we simply ran out of time. 
+
+We hope you enjoy our game!
+
+
+
+board_values.h:
+
+  This file declares variables that describe the possible states of the map
+  array and the player. These are numeric values that were assigned 
+  arbitrarily. The only thing that matters about their numbers is that they 
+  are the same number of numbers apart as our numbers and that the player
+  is equal to the number of their piece on the board.
+
+  - empty (0s in map_array) represents there is nothing on the chess board.
+  - white_piece (1s in map_array) represents there is a white piece on 
+    chess board at that location.
+  - black_piece (2s in map_array) represents there is a black piece on 
+    chess board at that location.
+  - white_win (3s in map_array) represents there is a winning move hint 
+    for white on chess board at that location and if a white piece is put 
+    there, white wins.
+  - black_win (4s in map_array) represents there is a winning move hint
+    for black on chess board at that location and if a black piece is put 
+    there, black wins
+  - both_win (5s in map_array) represents there is a winning move hint
+    for both on chess board at that location and that if either player 
+    puts a piece there, that player wins
+  - white (player = 1) represents it is currently white's turn.
+  - black (player = 2) represents it is currently black's trun.
+
+
+
+drawing.cpp: 
+
+  The point of this file is to define all functions that have anything to 
+  do with drawing the map, text, cursor, hints, or pieces on the board.
+  
+  This file includes the Arduino.h, Adafruit_ST7735.h, math.h, and 
+  board_values.h libraries.
+
+  Firstly, the vertical and horizontal control lines for joystick are
+  set up as well as the length of the side of the map.
+
+  draw_board:
+    By using for loops, we draw 19 horizontal and 19 vertical lines as the
+    chess board. The interval distance between two adjacent lines is 6 pixels
+    and the interval between the first line and the edge of the screen is 10.
+
+  draw_text:
+    Use functions of tft to draw input text (coloured black) to a choosen 
+    location below the board.
+
+  draw_black_piece:
+    Change a certain coordinate's map_array value to black_piece (2) and draw 
+    an all black circle with radius 3 at those coordinates as a black piece.
+
+  draw_white_piece:
+    Change a certain coordinate's map_array value to white_piece (1) and draw 
+    a white circle and a black boundary circle both with radius 3 at those 
+    coordinates as a white piece.
+
+  draw_cursor:
+    Draw the cursor as a black boundary rectangle filled with white at 
+    location x, y with a certain side length.
+
+  redraw_board:
+    When the cursor moves, it will leave a trace. We use a white rectangle
+    to wipe the trace and draw a cross to redraw the board. The cross is 
+    split into two lines. We have four variables: the x and y line length 
+    adjustors and the x and y position variable adjusters. When at an edge 
+    or a corner, these values are changed to adjust the length and position
+    of the lines drawn so that the edge of the board remains smooth.
+
+  wipe_clean:
+    By checking the whole board's map_array values, we redraw the coordinates
+    where there was a winning move hint so that no winning move hints are 
+    displayed. This is used in the event of someone winning.
+
+  record:
+    Function that sets the rules of piece putting and game ending. 
+    There are four conditions that may happen when a player is trying to place
+    a piece. If the player tries to put a piece on another, an error message
+    will be displayed, and after one second, a white rectangle will wipe this
+    message out. If the player put a piece on winning move hint spot, the 
+    program displays a winning message then wipes clean all winning move hints
+    and goes to an infinite loop to terminate the game. Else, a piece will
+    be put on the board and it turns to the other player. When the board is 
+    full, a "draw" message will be displayed and the game will be terminated.
+
+  decide:
+    Draws pieces, winning moves, or redraws the board when necessary.
+    When the map_array values are changed, the corresponding piece or winning
+    move hint will be drawn to the board and the previous winning move 
+    which is not needed will disappear and the board will be redrawn.
+
+  move_cursor:
+    First, the variables vertical and horizontal are created to store the
+    values read from joystick. When the joystick's value changes more than
+    the set sensitivity, the cursor's coordinates are changed accordingly and
+    draw_cursor is used on the cursor's updated coordinates. At the end, a 
+    delay is used to slow down the movement speed to make the cursor easier 
+    to control.
+
+  draw_white_win:
+    If the input coordinate x, y is a winning spot for white or both, 
+    a red rectangle of side length side is drawn as the winning move hint. 
+    Else, if it is a black win space, the winnning black hint is erased 
+    by redrawing the board at that location.
+
+  draw_black_win:
+    If the input coordinate x, y is a winning spot for black or both, 
+    a red rectangle of side length side is drawn as the winning move hint. 
+    Else, if it is a white win space, the winnning white hint is erased 
+    by redrawing the board at that location.
+
+
+drawing.h:
+
+  The functions in drawing.cpp (draw_board, draw_cursor, record, move_cursor,
+  draw_white_win, and draw_black_win) which are to be used in main file are 
+  declared in this file.
+
+  This file includes the Adafruit_ST7735.h library so that it knows what the
+  type Adafruit is.
+
+
+math.cpp:
+
+  The point of this file is to define all functions that have anything to do
+  with the rules of the game. We called it math because it does 
+  comparatively more math than drawing.cpp.
+
+  This file includes the Arduino.h, Adafruit_ST7735.h, drawing.h, and 
+  board_values.h libraries.
+
+  store:
+    When it's black's move, if there's nothing at the input coordinates,
+    change the map_array value to black_win to indicate this is a winning 
+    move for black. If the spot is already a winning move for white, change
+    it to both_win. When it's white's move, if there's nothing at the input 
+    coordinates, change the map_array value to white_win to indicate this 
+    is a winning move for white. If the spot is already a winning move for 
+    black, change it to both_win.
+
+  check_vertical:
+    Keeping x-coordinate fixed, and by changing y, check if there's a piece of 
+    same color below the first piece. We keep checking untill we have four.
+    If there's no piece at the start or end of the four, put a winning move 
+    hint in the appropriate spot. Then we check for three, then a space, then 
+    one; two, a space, then two; and one, a space, then three, then put a 
+    winning move hint on whichever space matches the conditions.
+
+  check_horizontal:
+    The same method as check_vertical except we keep y fixed and change x to
+    check for winning spaces in the horizontal direction.
+
+  find_diagonal1:
+    In this function, we use a pointer as input, and change the value it 
+    points to so that we can keep the value outside the function.
+    By subtracting whichever is smaller between x and y from whichever is 
+    larger, we get the starting coordinates of the diagonal from top left
+    to bottom right that we'll check for winning moves. x1 and y1 are the
+    variables used to represent the starting poin of the diagonal we'll
+    check.
+
+  check_diagonal1:
+    This uses a similar method to check_vertical, but in the direction of top 
+    left to bottom right diagonal, starting from the coordinates found by 
+    find_diagonal1. Also, the for loop is replaced by a while loop, followed 
+    by incrementing x and y, since the length of different diagonals is not 
+    constant.
+
+  find_diagonal2:
+    Similar to find_diagonal1. Find the starting coordinate of the other
+    diagonal. The equations and conditions used to find the starting 
+    coordinates in this function were found by careful examination of 
+    patterns on a smaller grid. Again, x1 and y1 are used to represent
+    the starting coordinates of the diagonal we'll check. 
+
+  check_diagonal2:
+    Same as check_diagonal1 in direction of top right to bottom left diagonal.
+
+  record_win_move:
+    Call all the four check functions in math.cpp to check for a possible 
+    winning move created by placing a piece at the location it's placed.
+
+
+
+math.h:
+
+  The function in math.cpp (record_win_move) which is to be used in drawing.cpp
+  is declared in this file.
+
+
+
+5Chess.cpp:
+
+  This is our main file that describes the initialization of several things
+  and calls the functions in the correct order, depending on user input.
+
+  This file includes the Arduino.h, Adafruit_ST7735.h, drawing.h, and 
+  board_values.h libraries.
+
+  We then defined things for the TFT card, the data/command line for TFT, 
+  and the Reset line for TFT. Then we assigned a variable tft as type 
+  Adafruit_ST7735. Some of these defines and includes were based off of 
+  files given in the virtual machine, as well as what we did for Assignment 2.
+
+  We set the horizontal, vertical and select pins of the joystick as being 
+  hooked up to A0, A1, and 9, respectively.
+
+  Then we initialized and set variables for the functions used throughout.
+
+  - sensitivity sets the threshold for how much the joystick must be
+    moved before it is picked up and the cursor is moved
+
+  - amount_slowed is a delay that slows down the motion of the cursor, 
+    making it easier to control.
+
+  - start_vertical and start_horizontal will be the initial horizontal
+    and vertical values of the joystick.
+
+  - radius is the radius of the circle representing the piece
+
+  - x and y are the coordinates of the cursor on the board. They were 
+    initially set to both be 9, which is the center of the board. Each 
+    intersection of lines in the horizontal direction counts as one unit 
+    of x and each intersection of lines in the vertical direction count 
+    as one unit of y.
+
+  - x1 and y1 are the variables that are going to be used by the functions
+    find_diagonal1 and find_diagonal2 to represent the starting coordinates
+    of the diagonal lines that the piece is being placed in.
+
+  - player initially equals black (2), which means black will make the first 
+    move.
+
+  - count counts the number of black pieces on the board.
+
+  - map_array is set to be a 19 by 19 array to represent the board. It is set
+    as full of zeroes because the board is empty at the very start.
+
+  We initialize for a black tabbed screen to allow the LCD to display the 
+  proper colors. We set the select button value of the joystick to HIGH. 
+  After this, the draw_board function is called to make the background white 
+  and to draw the chess board. Then, the initial vertical and horizontal values 
+  of the joystick are read. Then we draw the cursor with side equal to double 
+  radius minus one at the current location, which is the center of the board.
+
+  Then and infinite while loop is used to make the following steps repeat 
+  until a winning move is made. While the button isn't pressed down, 
+  move_cursor is called to guarantee the cursor can move when the button is 
+  not pressed. Once the button is clicked, the program goes into another 
+  while loop until it is released so that there is no problem with getting
+  more than one button press if the button is held down before being released
+  If the game does not end, the record function will change the values in 
+  map_array. If a win move is detected or if the board is full, the record 
+  function will go to a infinite loop to terminate this game. Then, the cursor
+  is redrawn. Then, the program goes through every spot on the board, drawing 
+  the current players win move hints and erasing the last players win move 
+  hints. It uses an if statement to find which player is going, then puts 
+  either draw_win_white or draw_win_black in two for loops to go through 
+  every spot on the board to do this. 
